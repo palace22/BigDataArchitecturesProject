@@ -1,0 +1,210 @@
+[
+    {
+        "id": "4f0f4e4a.a17a8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "6fb3da1d.310ff4",
+        "type": "inject",
+        "z": "4f0f4e4a.a17a8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 280,
+        "wires": [
+            [
+                "684328ac.34ca78",
+                "ef33919b.75f78"
+            ]
+        ]
+    },
+    {
+        "id": "b0e78c41.eb57c",
+        "type": "function",
+        "z": "4f0f4e4a.a17a8",
+        "name": "",
+        "func": "\nvar temp = msg.payload;\nmsg.headers = {};\nmsg.headers [ 'Content-type'] = 'text/plain';\nmsg.payload = [{ \"name\": \"degrees\" , \"value\": temp, \"type\": \"float\" }];\nreturn msg ;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 720,
+        "y": 220,
+        "wires": [
+            [
+                "b59d40d5.dd54d"
+            ]
+        ]
+    },
+    {
+        "id": "b59d40d5.dd54d",
+        "type": "fiware-orion-out",
+        "z": "4f0f4e4a.a17a8",
+        "name": "",
+        "authentication": "df327fcb.f2cee",
+        "tls": "",
+        "service": "f551fcf3.a6a4b",
+        "entype": "Weather",
+        "enid": "Test03",
+        "userk1": "986f113c-03aa-4865-a9f7-b628d21ef7df",
+        "passk2": "8d204506-3aea-4dff-8c23-dca0953be8c5",
+        "tenant": "",
+        "servicepath": "",
+        "apikey": "",
+        "basicAuth": "",
+        "x": 1150,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "4ac23de6.e2a4c4",
+        "type": "debug",
+        "z": "4f0f4e4a.a17a8",
+        "name": "Query v1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1180,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "684328ac.34ca78",
+        "type": "fiware orion",
+        "z": "4f0f4e4a.a17a8",
+        "name": "",
+        "authentication": "df327fcb.f2cee",
+        "service": "230bf48d.3abf7c",
+        "tls": "",
+        "entype": "Weather",
+        "enid": "Test03",
+        "userk1": "986f113c-03aa-4865-a9f7-b628d21ef7df",
+        "passk2": "8d204506-3aea-4dff-8c23-dca0953be8c5",
+        "tenant": "",
+        "servicepath": "",
+        "apikey": "",
+        "basicAuth": "",
+        "attributes": "degrees",
+        "rtype": "",
+        "rvalue": "",
+        "limit": 20,
+        "includeattr": true,
+        "x": 500,
+        "y": 340,
+        "wires": [
+            [
+                "4ac23de6.e2a4c4"
+            ]
+        ]
+    },
+    {
+        "id": "ef33919b.75f78",
+        "type": "random",
+        "z": "4f0f4e4a.a17a8",
+        "name": "",
+        "low": "100",
+        "high": "600",
+        "inte": "true",
+        "property": "payload",
+        "x": 460,
+        "y": 220,
+        "wires": [
+            [
+                "b0e78c41.eb57c"
+            ]
+        ]
+    },
+    {
+        "id": "3c2408cc.286b48",
+        "type": "fiware orion in",
+        "z": "4f0f4e4a.a17a8",
+        "name": "",
+        "authentication": "df327fcb.f2cee",
+        "service": "f551fcf3.a6a4b",
+        "tls": "",
+        "throttle": "PT5S",
+        "entype": "",
+        "enid": "",
+        "userk1": "",
+        "passk2": "",
+        "tenant": "",
+        "servicepath": "",
+        "apikey": "",
+        "basicAuth": "",
+        "ispattern": false,
+        "duration": "P1Y",
+        "attributes": "",
+        "condvalues": "",
+        "includeattr": true,
+        "noderedhost": "",
+        "noderedhostauto": true,
+        "x": 510,
+        "y": 440,
+        "wires": [
+            [
+                "22cf6ce1.700f54"
+            ]
+        ]
+    },
+    {
+        "id": "22cf6ce1.700f54",
+        "type": "debug",
+        "z": "4f0f4e4a.a17a8",
+        "name": "Subscribe v1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1170,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "df327fcb.f2cee",
+        "type": "snap4city-authentication",
+        "z": "",
+        "name": ""
+    },
+    {
+        "id": "f551fcf3.a6a4b",
+        "type": "orion-service",
+        "z": "",
+        "name": "iotobsf",
+        "url": "iotobsf",
+        "port": "8443"
+    },
+    {
+        "id": "230bf48d.3abf7c",
+        "type": "orion-service",
+        "z": "",
+        "name": "orionbrokerfilter",
+        "url": "localhost/orionbrokerfilter-0.0.1",
+        "port": "8080"
+    }
+]

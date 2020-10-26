@@ -1,0 +1,203 @@
+[
+    {
+        "id": "47434a4f.979374",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "4b2bbb40.8721b4",
+        "type": "inject",
+        "z": "47434a4f.979374",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 300,
+        "wires": [
+            [
+                "af01b8ff.ca1d88",
+                "d4c133f8.a2ba"
+            ]
+        ]
+    },
+    {
+        "id": "af01b8ff.ca1d88",
+        "type": "Fiware-Orion API v2: Query",
+        "z": "47434a4f.979374",
+        "name": "",
+        "authentication": "df327fcb.f2cee",
+        "service": "9074df74.9e1da",
+        "tls": "",
+        "entype": "Weather",
+        "enid": "Test03",
+        "userk1": "986f113c-03aa-4865-a9f7-b628d21ef7df",
+        "passk2": "8d204506-3aea-4dff-8c23-dca0953be8c5",
+        "tenant": "",
+        "servicepath": "",
+        "apikey": "",
+        "basicAuth": "",
+        "attributes": "degrees,longitude",
+        "rtype": "",
+        "rvalue": "",
+        "limit": 20,
+        "includeattr": true,
+        "x": 520,
+        "y": 360,
+        "wires": [
+            [
+                "ce544978.524b28"
+            ]
+        ]
+    },
+    {
+        "id": "ce544978.524b28",
+        "type": "debug",
+        "z": "47434a4f.979374",
+        "name": "Query",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1190,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "b1c6cfa1.7456a",
+        "type": "Fiware-Orion API v2: Update",
+        "z": "47434a4f.979374",
+        "name": "",
+        "authentication": "",
+        "tls": "",
+        "service": "9074df74.9e1da",
+        "entype": "Weather",
+        "enid": "Test03",
+        "userk1": "986f113c-03aa-4865-a9f7-b628d21ef7df",
+        "passk2": "8d204506-3aea-4dff-8c23-dca0953be8c5",
+        "tenant": "",
+        "servicepath": "",
+        "apikey": "",
+        "basicAuth": "",
+        "x": 1120,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "1dbe6ec5.3bf181",
+        "type": "function",
+        "z": "47434a4f.979374",
+        "name": "",
+        "func": "var temp = msg.payload;\nmsg.headers = {};\nmsg.headers [ 'Content-type'] = 'text/plain';\nmsg.payload = [{\n    \"degrees\": {\n        \"value\": temp,\n        \"type\": \"float\"\n    }\n}];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 760,
+        "y": 240,
+        "wires": [
+            [
+                "b1c6cfa1.7456a"
+            ]
+        ]
+    },
+    {
+        "id": "d4c133f8.a2ba",
+        "type": "random",
+        "z": "47434a4f.979374",
+        "name": "",
+        "low": "100",
+        "high": "600",
+        "inte": "true",
+        "property": "payload",
+        "x": 460,
+        "y": 240,
+        "wires": [
+            [
+                "1dbe6ec5.3bf181"
+            ]
+        ]
+    },
+    {
+        "id": "e069d053.7da87",
+        "type": "Fiware-Orion API v2: Subscribe",
+        "z": "47434a4f.979374",
+        "name": "",
+        "authentication": "df327fcb.f2cee",
+        "service": "9074df74.9e1da",
+        "tls": "",
+        "throttle": "PT5S",
+        "entype": "Weather",
+        "enid": "Test03",
+        "userk1": "986f113c-03aa-4865-a9f7-b628d21ef7df",
+        "passk2": "8d204506-3aea-4dff-8c23-dca0953be8c5",
+        "tenant": "",
+        "servicepath": "",
+        "apikey": "",
+        "basicAuth": "",
+        "ispattern": false,
+        "duration": "P1Y",
+        "attributes": "degrees",
+        "condvalues": "",
+        "includeattr": true,
+        "noderedhost": "",
+        "noderedhostauto": true,
+        "x": 530,
+        "y": 520,
+        "wires": [
+            [
+                "1ba177ce.0d2e98"
+            ]
+        ]
+    },
+    {
+        "id": "1ba177ce.0d2e98",
+        "type": "debug",
+        "z": "47434a4f.979374",
+        "name": "Subscribe",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1180,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "df327fcb.f2cee",
+        "type": "snap4city-authentication",
+        "z": "",
+        "name": ""
+    },
+    {
+        "id": "9074df74.9e1da",
+        "type": "Fiware-Orion API v2: Service",
+        "z": "",
+        "name": "iotobsf",
+        "url": "iotobsf",
+        "port": "8443"
+    }
+]
