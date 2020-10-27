@@ -101,7 +101,28 @@ Prima di tutto andiamo a impostare l'ambiente di sviluppo locale con cui poter l
    cd .node-red/
    npm i $PATH/node-red-contrib-snap4city-user
    ```
-4. Da terminale avviamo NodeRed:
+4. Definiamo all'interno del file *./node-red/settings.js* 
+    ```js
+    var keycloak_base_uri = 'http://dashboard:8088/auth/admin/master'
+    var keycloak_clientid = 'nodered-iotedge'
+    var keycloak_clientsecret = 'ec4f3896-8fee-4f37-8703-eee13e7bd609'
+    var iotdirectory_uri = 'https://www.snap4city.org/  iotdirectorytest/'
+    var ownership_url = 'http://dashboard/ownership-api/'
+    ```
+    e aggiungiamo in *module.exports* dello stesso:
+    ```js
+    module.exports = {
+        keycloakBaseUri: keycloak_base_uri,
+        keycloakClientid: keycloak_clientid,
+        keycloakClientsecret: keycloak_clientsecret,
+        iotDirectoryUrl: iotdirectory_uri,
+        ownershipUrl: ownership_url,
+        ...
+    }
+    ```
+    e infine creiamo un client *nodered-iotedge* in http://dashboard:8088/auth/ accedendo con credenziali: *username: admin password: admin*.
+    Come suggerito nell'eleborato *[Sviluppi Snap4City](https://github.com/palace22/BigDataArchitecturesProject/blob/master/Elaborati/Sviluppi_Snap4City.pdf)* di Andrea Spitaleri.
+5. Da terminale avviamo NodeRed:
    ```
    node-red
    ```
