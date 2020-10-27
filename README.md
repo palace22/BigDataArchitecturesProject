@@ -1,4 +1,4 @@
-# Big data architectures
+# Big data architectures: Sviluppo OrionFiware API v2 in nodi NodeRed e integrazione in Snap4City
 
 ## 1. Installazione ambiente di test
 
@@ -120,7 +120,7 @@ Prima di tutto andiamo a impostare l'ambiente di sviluppo locale con cui poter l
         ...
     }
     ```
-    e infine creiamo un client *nodered-iotedge* in http://dashboard:8088/auth/ accedendo con credenziali: *username: admin password: admin*.
+    e infine creiamo un client "*nodered-iotedge*" in http://dashboard:8088/auth/ accedendo con credenziali: *username: admin password: admin*.
     Come suggerito nell'eleborato *[Sviluppi Snap4City](https://github.com/palace22/BigDataArchitecturesProject/blob/master/Elaborati/Sviluppi_Snap4City.pdf)* di Andrea Spitaleri.
 5. Da terminale avviamo NodeRed:
    ```
@@ -129,9 +129,9 @@ Prima di tutto andiamo a impostare l'ambiente di sviluppo locale con cui poter l
 
 ### 2.4 Implementazione Fiware Orion API v2
 
-Alla pagina della documentazione di FiwareOrion è possibile trovare la [sezione](https://fiware-orion.readthedocs.io/en/2.4.2/user/forbidden_characters/index.html#custom-payload-special-treatment) dedicata alle API e come queste devono essere usate. A differenza della prima versione queste sono più chiare nell'utilizzo, sfruttando i metodi HTTP (POST, GET, PATCH, ...) nel migliore dei modi, rendendo la sintassi delle richieste più chiara e leggera; il salvataggio e l'aggionamento di entità allàinterno del broker rimane comunque retrocompatibile con la versione 1.
+Alla pagina della documentazione di FiwareOrion è possibile trovare la [sezione](https://fiware-orion.readthedocs.io/en/2.4.2/user/forbidden_characters/index.html#custom-payload-special-treatment) dedicata alle API e come queste devono essere usate. A differenza della prima versione queste sono più chiare nell'utilizzo, sfruttando i metodi HTTP (POST, GET, PATCH, ...) nel migliore dei modi, rendendo la sintassi delle richieste più chiara e leggera; il salvataggio e l'aggionamento di entità all'interno del broker rimane comunque retrocompatibile con la versione 1.
 
-Il procedimento che ho seguito è il seguente: una volta duplicati i file .js e .html dei nodi Orion V1 (_orion.js_ e _otion.html_), ho rinominato i file e i nodi per averli visibili in NodeRed (che non ammette nodi duplicati).
+Il procedimento che ho seguito è il seguente: una volta duplicati i file .js e .html dei nodi Orion V1 (_orion.js_ e _otion.html_), ho rinominato i file e i nodi per averli visibili in NodeRed.
 
 I file in cui vengono implemetati i blocchi NodeRed vengono definiti in _package.json_:
 
@@ -180,13 +180,26 @@ Durante quest'implementazione ho notato del codice duplicato e parti di codice c
 * *subscriptionStore.js*: classe la cui responsabilità è di salvare coppie di: *[ID nodo: ID subscription]* in un file json così che una volta chiuso NodeRed alla sua riapertura si possa recuperare.
 
 ## 3. OrionBrokerFilter
+Implementati i nodi delle API v2 bisogna integrarli seguendo la logica di Snap4City rigurando l'autenticazione dell'utente e dei device/sensori. Riprendendo l'immagine delle richieste:
+
+![Alt text](Image/request-response.png)
 
 ## BUG Conosciuti
 
-1. La VM MAIN e la IOTOBSF non sono collegate. I dispositivi installati in una possono non essere visibili dall altra.
-2. Le sottoscrizioni vengono salvata non so dove, l'unsubscribe viene effettuato ma si tenta comunque di fare pull sulle vecchie sottoscrizioni andando in errore. **RISOLTO**
-3. Nella VM IOTOBSF, il containet di orion ogni tanto ( non sono stato in grado di riprodurlo ) va in restarting e non ho trovato il modo di farlo ripartire.
-4. La VM MAIN ogni tanto ( non sono stato in grado di riprodurlo ) da errori di kernel, unica soluzione reinstallare la VM. ( BUG punto 1, i dispositivi precedentemente installati e presenti non sono piu visibili)
+1. La VM MAIN e la IOTOBSF non sono collegate. I dispositivi installati in una possono non essere visibili dall'altra.
+2. Le sottoscrizioni non vengono salvate, al momento della chiusura di NodeRed le sottoscrizioni restano, l'unsubribe non puo essere fatto non conoscendo l'ID, la subscription viene eliminata all'expire. **RISOLTO**
+3.  Nella VM IOTOBSF, il container di orion ogni tanto (non sono stato in grado di riprodurlo) va in restarting.
+**POSSIBILE SOLUZIONE**: entrare nella cartella in cui è presente docker-compose:
+    ```
+    sudo docker-compose down
+    sudo docker-compose up -d
+    ```
+    **Soluzione drastica** rimuove tutto e reinstalla i     container, verranno eliminati i device e i dati inseriti    (BUG 1.):
+    ```
+    sudo docker-compose down -v --rmi all --remove-orphans
+    sudo docker-compose up -d
+    ```
+4. La VM MAIN ogni tanto (non sono stato in grado di riprodurlo) da errori di kernel, unica soluzione reinstallare la VM ( BUG punto 1, i dispositivi precedentemente installati e presenti in IOTOBSF non sono piu visibili).
 
 ## TODO
 
@@ -194,3 +207,9 @@ Durante quest'implementazione ho notato del codice duplicato e parti di codice c
 7. da spring.prefixelementID=DISIT:brokerid
    a spring.prefixelementID=Organization:iotobsf da controllare nel db mysql nella vm main nel db profilebd tabella ownership
 8. API v2 Update togliere il manuale e consentire un solo attriuto
+
+## Possibili sviluppi
+1. **node-red-contrib-snap4city-user**: Continuazione refactoring codice di *OrionAPIv2* soprattutto riguardo le richieste http. Sarebbe opportuno dividere il file creandone uno per ogni nodo e strutturare meglio il file *snap4city-utility*.
+2. **OrionBrokerFilter**: Al momento, per ogni richiesta (es. Update) viene controllato solamente un sensore (il primo), le richieste dunque vengono eseguite pur non controllando l'ownership o la delegation degli altri.
+3. Recupero dati da IOTOBSF e inserirli nella VM MAIN e viceversa check di device nella VM MAIN in IOTOBSF.
+4. Creazione su Github di un progetto **Snap4City** in cui inserire una repo per ogni cartella di [snap4city](https://github.com/disit/snap4city).
