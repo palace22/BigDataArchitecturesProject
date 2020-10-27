@@ -142,7 +142,20 @@ Ho iniziato facendo alcune prove seguendo la documentazione delle API e utilizza
 #### **Subscribe**
 Il primo nodo implementato è stato quello del **Subscribe**, procedendo cambiando il path e il payload della richiesta, adattando poi la risposta di Orion a NodeRed: a differenza delle API v1 nelle v2 l'ID della subscription viene restituito nell'*header* della risposta al parametro *Location* e non nel body.
 
+#### **Query**
+Il nodo **Query** da una richiesta POST diventa una di tipo GET, come ci si potrebbe aspettare, dunque sono state modificate le *options* della richiesta costruendo la query con parametri da aggiungere alla URL piuttosto che creare il body:
+```
+GET iotobsf:1026/v2/entities/DeviceName?attrs=deviceAttribute
+```
 
+#### **Update**
+
+
+### 2.5 Refactoring, pulizia codice e *SubscriptionStore*
+Durante quest'implementazione ho notato del codice duplicato e parti di codice che poteva essere rifattorizzato. All'interno della cartella *utils* si trovano:
+* *httpRequestOption.js*: classe i cui metodi generano le *options* delle richieste HTTP dei vari nodi.
+* *nodeStatus.js*: classe in cui sono implementati i metodi che consentono di avere un feedback grafico su NodeRed. 
+* *subscriptionStore.js*: classe la cui responsabilità è di salvare ID del nodo e ID della subscription in un file json così che una volta chiuso NodeRed alla sua riapertura si possa recuperare.
 ## 3. OrionBrokerFilter
 
 ## BUG Conosciuti
