@@ -145,17 +145,19 @@ Il primo nodo implementato è stato quello del **Subscribe**, procedendo cambian
 #### **Query**
 Il nodo **Query** da una richiesta POST diventa una di tipo GET, come ci si potrebbe aspettare, dunque sono state modificate le *options* della richiesta costruendo la query con parametri da aggiungere alla URL piuttosto che creare il body:
 ```
-GET iotobsf:1026/v2/entities/DeviceName?attrs=deviceAttribute
+GET iotobsf:1026/v2/entities/{deviceName}?attrs={deviceAttribute}
 ```
 
 #### **Update**
+Riguardo l'Update degli attributi il metodo cambia da POST a PATCH cambiando anche il body. Un cambiamento importante è dato dalla risposta di questo metodo, mentre con le API v1 veniva restituito il body con il device aggiornato con le API v2 la risposta non ha body ma solo uno status code *204 No Content*. La mancanza del body rende il nodo che prende un input e restituisce un output inutile al suo scopo, è stato comunque implementato con il nome: *Fiware-Orion API v2: Test* mentre resta invariato l'utilizzo di *Fiware-Orion API v2: Update*.
 
 
 ### 2.5 Refactoring, pulizia codice e *SubscriptionStore*
 Durante quest'implementazione ho notato del codice duplicato e parti di codice che poteva essere rifattorizzato. All'interno della cartella *utils* si trovano:
-* *httpRequestOption.js*: classe i cui metodi generano le *options* delle richieste HTTP dei vari nodi.
-* *nodeStatus.js*: classe in cui sono implementati i metodi che consentono di avere un feedback grafico su NodeRed. 
-* *subscriptionStore.js*: classe la cui responsabilità è di salvare ID del nodo e ID della subscription in un file json così che una volta chiuso NodeRed alla sua riapertura si possa recuperare.
+* *httpRequestOption.js*: classe i cui metodi generano le *options* delle richieste HTTP dei vari nodi (Query, Subscribe, ...).
+* *nodeStatus.js*: classe in cui sono implementati i metodi che consentono di avere un feedback grafico su NodeRed.
+* *subscriptionStore.js*: classe la cui responsabilità è di salvare coppie di: *[ID nodo: ID subscription]* in un file json così che una volta chiuso NodeRed alla sua riapertura si possa recuperare.
+
 ## 3. OrionBrokerFilter
 
 ## BUG Conosciuti
