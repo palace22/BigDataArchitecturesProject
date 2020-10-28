@@ -53,7 +53,7 @@ Verificate dal vostro browser su:
 - http://dashboard:8080/
 - http://iotobsf:8080/
 - http://kbssm:8080/
-
+---
 ## 2. NodeRed e FiwareOrion
 
 ### 2.1 Primi passi
@@ -178,13 +178,85 @@ Durante quest'implementazione ho notato del codice duplicato e parti di codice c
 * *httpRequestOption.js*: classe i cui metodi generano le *options* delle richieste HTTP dei vari nodi (Query, Subscribe, ...).
 * *nodeStatus.js*: classe in cui sono implementati i metodi che consentono di avere un feedback grafico su NodeRed.
 * *subscriptionStore.js*: classe la cui responsabilità è di salvare coppie di: *[ID nodo: ID subscription]* in un file json così che una volta chiuso NodeRed alla sua riapertura si possa recuperare.
-
+---
 ## 3. OrionBrokerFilter
 Implementati i nodi delle API v2 bisogna integrarli seguendo la logica di Snap4City rigurando l'autenticazione dell'utente e dei device/sensori. Riprendendo l'immagine delle richieste:
 
 ![Alt text](Image/request-response.png)
 
-## BUG Conosciuti
+### 3.1 Preparazione ambiente 
+
+Dunque installiamo in locale l'OrionBrokerFilter e configuriamolo per il nostro ambiente di sviluppo.
+Il progetto si trova all'interno della cartella **OrionBrokerFilter** della repo di [Snap4City](https://github.com/disit/snap4city).
+
+L'ambiente di sviluppo è cosi configurato: JDK *java-8-openjdk*, come IDE ho utilizzato Eclipse, per avviare il progetto ho utilizzato il plugin di [Tomcat](https://marketplace.eclipse.org/content/eclipse-tomcat-plugin).
+
+Apriamo Eclipse e importiamo il progetto come *progetto maven esistente*, fatto ciò dalla cartella del progetto lanciamo:
+```
+mvn clean install -DskipTests
+```
+Questo installerà le dipendenze necessarie definite nel *pom.xml* e genererà i target.
+
+Impostiamo le configurazioni necessarie, in *src/main/resources/* troviamo dei file .properties in cui sono dichiarati dei parametri utilizzati da Spring all'interno dell'applicazione, con l'aiuto di Angelo li ho definiti in questo modo nel file *application-local.properties*    `:
+```bash
+logging.config=classpath:/log4j2-spring-local.xml
+
+spring.openidconnect.clientid=orionbrokerfilter
+spring.openidconnect.username=userrootadmin
+spring.openidconnect.password=Sl9.wrE@k
+
+#keyclock di test
+spring.openidconnect.token_endpoint=http://dashboard:8088/auth/realms/master/protocol/openid-connect/token
+
+spring.ownership_endpoint=http://dashboard/ownership-api/v1/list
+spring.delegation_endpoint=http://dashboard:8080/datamanager/api/v1/apps
+spring.orionbroker_endpoint=http://iotobsf:1026
+
+spring.elapsingcache.minutes=3
+
+#cors.origins.accepted=http://localhost
+
+spring.prefixelementID=Organization:iotobsf
+
+connection.timeout=10000
+connection.max=20
+```
+
+Durante lo sviluppo di questa integrazione è stato riscontrato un problema dato da queste configurazioni in quanto l'ownership dei device non veniva trovata, questo è stato risolto andando a controllare all'interno del MySQL db della VM MAIN nello specifico nella tabella *ownership* del *profiledb*, per accedervi ho utilizzato [Beekeeper Studio](https://www.beekeeperstudio.io/) accedendo con:
+```
+host: dashboard
+port: 3306
+user: root
+password: password
+default database: profiledb
+```
+
+Il problema è stato risolto cambiando il parametro 
+*spring.prefixelementID* da *DISIT:iotobsf* a *Organization:iotobsf* come mostrato dal campo *elementId* del db.
+
+Assicuriamoci inoltre con sia presente un client *orionbrokerfilter* in http://dashboard:8088/auth/ e in caso negativo creiamolo.
+
+Prima di avviare il server bisogna settare il file *.properties* e il path del log da utilizzare in *Preferences>Tomcat>JVM Settings* nel mio caso aggiungo come parametri:
+```
+-Dspring.profiles.active=local -DlogFileFolder=/home/user/Documents/log
+```
+Mentre in *Preferences>Tomcat>Tomcat Manager App* settiamo le credenziali per accedere all'application manager.
+Avviato il server accediamo all'application manarer di default a http://localhost:8080/manager con le credenziali settate, scegliamo il file WAR ovvero *orionbrokerfilter-0.0.1.war* nella cartella target e "deployamo".
+
+### 3.2 Test funzionamento su API v1
+Per essere certi che tutto sia stato configurato correttamente testiamo il funzionamento dell'OrionBrokerFilter con le API v1 dunque da NodeRed aggiungiamo un nuovo service:
+```
+"name": "orionbrokerfilter",
+"url": "localhost/orionbrokerfilter-0.0.1",
+"port": "8080"
+```
+deployamo il flow e verifichiamo il funzionamento.
+
+### 3.3 Implementazione filter per API v2
+
+
+---
+## Bug conosciuti
 
 1. La VM MAIN e la IOTOBSF non sono collegate. I dispositivi installati in una possono non essere visibili dall'altra.
 2. Le sottoscrizioni non vengono salvate, al momento della chiusura di NodeRed le sottoscrizioni restano, l'unsubribe non puo essere fatto non conoscendo l'ID, la subscription viene eliminata all'expire. **RISOLTO**
@@ -201,15 +273,8 @@ Implementati i nodi delle API v2 bisogna integrarli seguendo la logica di Snap4C
     ```
 4. La VM MAIN ogni tanto (non sono stato in grado di riprodurlo) da errori di kernel, unica soluzione reinstallare la VM ( BUG punto 1, i dispositivi precedentemente installati e presenti in IOTOBSF non sono piu visibili).
 
-## TODO
-
-6. Recuperare URL contextBroker da tendina nodo node-red
-7. da spring.prefixelementID=DISIT:brokerid
-   a spring.prefixelementID=Organization:iotobsf da controllare nel db mysql nella vm main nel db profilebd tabella ownership
-8. API v2 Update togliere il manuale e consentire un solo attriuto
-
 ## Possibili sviluppi
-1. **node-red-contrib-snap4city-user**: Continuazione refactoring codice di *OrionAPIv2* soprattutto riguardo le richieste http. Sarebbe opportuno dividere il file creandone uno per ogni nodo e strutturare meglio il file *snap4city-utility*.
-2. **OrionBrokerFilter**: Al momento, per ogni richiesta (es. Update) viene controllato solamente un sensore (il primo), le richieste dunque vengono eseguite pur non controllando l'ownership o la delegation degli altri.
+1. **node-red-contrib-snap4city-user**: Continuazione refactoring codice di *OrionAPIv2* soprattutto riguardo le richieste http. Inoltre sarebbe opportuno dividere il file creandone uno per ogni nodo e strutturare meglio il file *snap4city-utility*.
+2. **OrionBrokerFilter**: Al momento, per ogni richiesta (es. Update) viene controllato solamente un sensore (il primo), le richieste dunque vengono eseguite pur non controllando l'ownership o la delegation degli altri o il alternativa consentire l'inserimento di un solo attributo.
 3. Recupero dati da IOTOBSF e inserirli nella VM MAIN e viceversa check di device nella VM MAIN in IOTOBSF.
 4. Creazione su Github di un progetto **Snap4City** in cui inserire una repo per ogni cartella di [snap4city](https://github.com/disit/snap4city).
