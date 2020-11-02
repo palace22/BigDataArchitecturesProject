@@ -253,7 +253,48 @@ Per essere certi che tutto sia stato configurato correttamente testiamo il funzi
 deployamo il flow e verifichiamo il funzionamento.
 
 ### 3.3 Implementazione filter per API v2
+I file dell'OrionBrokerFilter che bisogna modificare sono tre:
+1. Innanzitutto è stato aggiunto il prefisso */v2/* al matcher del filtro nel file *MultiHttpSecurityConfig*.
+2. In *OrionController* sono stati implementati i metodi relativi agli endpoint delle richieste Orion, prendiamo come esempio la richiesta di update: 
+    ```java
+	@RequestMapping(value = "/v2/entities/{deviceId}/attrs", method = RequestMethod.PATCH, consumes = { "application/json" })
+	@ResponseBody
+	public ResponseEntity<String> updateV2(@PathVariable("deviceId") String deviceId, @RequestBody String payload, @RequestHeader HttpHeaders headers) {
 
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(orionbroker_endpoint + "/v2/entities/"+deviceId+"/attrs")
+				.build();
+
+		return proxyPatchRequest(uriComponents, payload, headers);
+	}
+    ```
+
+    Inseme agli endpoint sono stati implementati i proxy relativi ai metodi: GET, PATCH, DELETE che con l'API v1 non vevivano utilizzati, continuando l'esempio:
+
+    ```JAVA
+	private ResponseEntity<String> proxyPatchRequest(UriComponents uriComponents, String payload, HttpHeaders headers) {
+		logger.info("Proxying request to {} on {}", uriComponents.toString(), payload);
+
+		HttpEntity<String> entity = new HttpEntity<>(payload, headers);
+
+		try {
+			ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.PATCH, entity, String.class);
+			logger.debug(response);
+			
+		} catch (HttpClientErrorException e) {
+			logger.error("Trouble in proxyPatchRequest: ", e);
+			return new ResponseEntity<String>(e.getMessage(), e.getStatusCode());
+		} catch (Exception e) {
+			logger.error("BIG Trouble in proxyPatchRequest", e);
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<String>(HttpStatus.NO_CONTENT);
+	}
+    ```
+
+    Da qui ho provato il funzionamento delle nuove funzioni, controllando se venissero chiamate e se ci fossero errori e questo mi ha portato anche grazie al supporto di Angelo alla modifice del terzo file.
+3.  L'ultima modifica è stata effettuata nel *AccessTokenAuthenticationFilter* e riguarda il nome dei sensori del device della richiesta, una volta estratto il nome del sensore viene verificato che chi effettua la richiesta abbia l'autorizzazione, il sensore sia suo o gli è stato delegato, in caso negativo questa non può andare a buon fine. Dunque ho implementato il metodo *getSensorNameAPIv2(...)* in modo da restituire il nome del sensore in base alla richiesta effettuata (GET, POST, etc.) e dunque permettere il controllo dell'autorizzazione.
+
+Sono stati condotti altri test per verificare il funzionamento del tutto ed infine è stata creata una pull request per quanto riguarda il codice dei blocchetti ed è stato passato il link della repo dell'OrionFilter a Angelo che ha proceduto a vefiricare il funzionamento. 
 
 ---
 ## Bug conosciuti
