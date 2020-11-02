@@ -1,5 +1,14 @@
 # Big data architectures: Sviluppo OrionFiware API v2 in nodi NodeRed e integrazione in Snap4City
 
+Questo elaborato ha lo scopo di integrare all'interno del progetto Snap4City le API v2 di Fiware Orion Broker, queste verranno implementate all'interno della piattaforma NodeRed utilizzata per lo sviluppo di applicazioni IOT.
+
+### Fiware Orion Broker
+
+
+
+###  NodeRed
+NodeRED è uno strumento di sviluppo basato sul "flusso" che consente di collegare insieme dispositivi hardware, API e servizi online. Elementi principali di NodeRed sono i nodi, graficamente dei blocchetti, che racchiudono all'interno delle funzioni programmate ad hoc per svolgere un determinato compito es. restituire un numero random, eseguire richieste HTTP, etc. Tramite il collegamenti di più nodi è possibile creare vere e proprie applicazioni.
+
 ## 1. Installazione ambiente di test
 
 Ambiente utilizzato _Ubuntu 20.04_ in una macchina con SSD, i7-7700HQ e 16GB Ram.
@@ -63,9 +72,9 @@ Per avere un primo esempio del funzionamento di NodeRed è possibile guardare il
 
 I blocchetti (nodi) NodeRed sono dei wrapper di specifiche funzioni, possiamo dividerle in 3 macro categorie:
 
-- Blocchetti che hanno un input che viene elaborato all'interno di questo e forniscono un output da poter riutilizzare (_FiwareOrion APIv2: Subscribe_).
-- Blocchetti che ricevono un input da un blocchetto a questo collegato, lo elaborano secondo la funzione specificata e restituiscono un output da poter riutilizzare (_FiwareOrion APIv2: Query_).
-- Blocchetti che ricevono un input da un blocco a questo collegato e elaborano un output (_FiwareOrion APIv2: Output_).
+- Blocchetti che hanno un input che viene elaborato all'interno di questo e forniscono un output da poter riutilizzare (_FiwareOrion: Subscribe_).
+- Blocchetti che ricevono un input da un blocchetto a questo collegato, lo elaborano secondo la funzione specificata e restituiscono un output da poter riutilizzare (_FiwareOrion: Query e FiwareOrion: Update_).
+- Blocchetti che ricevono un input da un blocco a questo collegato e elaborano un output (_FiwareOrion: Out_).
 
 I nodi sono collegati tra loro con collegamenti uno-a-uno e uno-a-molti, con questi vengono implementate le applicazioni IOT di interesse.
 
@@ -90,9 +99,8 @@ Per cominciare ad avere familiarità con Orion e NodeRed facciamo un esempio.
 
 4. Testiamo il funzionamento.
 
-### 2.3 Ambiente di sviluppo NodeRed locale
-
-Prima di tutto andiamo a impostare l'ambiente di sviluppo locale con cui poter lavorare sui nodi.
+### 2.3 Ambiente IoT Edge: sviluppo NodeRed in locale
+Passiamo dallo scenario IoT Cloud a quello IoT Edge cosi da poter lavorare e apportare modifiche ai blocchetti più facilmente:
 
 1. Installiamo **NodeRed** in locale.
 2. Forkiamo la repository [node-red-contrib-snap4city-user](https://github.com/disit/node-red-contrib-snap4city-user) e creiamo un branch con il nome del lavoro da svolgere, in questo caso [node-red-fiware-orion-API-v2-nodes](https://github.com/palace22/node-red-contrib-snap4city-user/tree/node-red-fiware-orion-API-v2-nodes).
@@ -170,14 +178,15 @@ GET iotobsf:1026/v2/entities/{deviceName}?attrs={deviceAttribute}
 ```
 
 #### **Update**
-Riguardo l'Update degli attributi il metodo cambia da POST a PATCH cambiando anche il body. Un cambiamento importante è dato dalla risposta di questo metodo, mentre con le API v1 veniva restituito il body con il device aggiornato con le API v2 la risposta non ha body ma solo uno status code *204 No Content*. La mancanza del body rende il nodo che prende un input e restituisce un output inutile al suo scopo, è stato comunque implementato con il nome: *Fiware-Orion API v2: Test* mentre resta invariato l'utilizzo di *Fiware-Orion API v2: Update*.
+Riguardo l'Update degli attributi il metodo cambia da POST a PATCH cambiando anche il body. Un cambiamento importante è dato dalla risposta di questo metodo, mentre con le API v1 veniva restituito il body con il device aggiornato con le API v2 la risposta non ha body ma solo uno status code *204 No Content*. La mancanza del body rende il nodo che prende un input e restituisce un output inutile al suo scopo, è stato comunque implementato con il nome: *Fiware-Orion API v2: Test* mentre resta invariato l'utilizzo di *Fiware-Orion API v2: Update*. Nell caso di utilizzo di *Fiware-Orion API v2: Update* il payload cambia rispetto alle API v1 dunque volendo scrivere il payload manualmente all'interno di un blocchetto NodeRed ecco la sinstassi da utilizzare:
 
+![Alt text](Image/uploadPayload.png)
 
 ### 2.5 Refactoring, pulizia codice e *SubscriptionStore*
 Durante quest'implementazione ho notato del codice duplicato e parti di codice che poteva essere rifattorizzato. All'interno della cartella *utils* si trovano:
 * *httpRequestOption.js*: classe i cui metodi generano le *options* delle richieste HTTP dei vari nodi (Query, Subscribe, ...).
 * *nodeStatus.js*: classe in cui sono implementati i metodi che consentono di avere un feedback grafico su NodeRed.
-* *subscriptionStore.js*: classe la cui responsabilità è di salvare coppie di: *[ID nodo: ID subscription]* in un file json così che una volta chiuso NodeRed alla sua riapertura si possa recuperare.
+* *subscriptionStore.js*: classe la cui responsabilità è di salvare coppie di: *[ID nodo: ID subscription]* in un file json (*in snap4cityConfig/subscriptions.json*) così che una volta chiuso NodeRed alla sua riapertura si possa recuperare.
 ---
 ## 3. OrionBrokerFilter
 Implementati i nodi delle API v2 bisogna integrarli seguendo la logica di Snap4City rigurando l'autenticazione dell'utente e dei device/sensori. Riprendendo l'immagine delle richieste:
@@ -293,15 +302,48 @@ I file dell'OrionBrokerFilter che bisogna modificare sono tre:
 
     Da qui ho provato il funzionamento delle nuove funzioni, controllando se venissero chiamate e se ci fossero errori e questo mi ha portato anche grazie al supporto di Angelo alla modifice del terzo file.
 3.  L'ultima modifica è stata effettuata nel *AccessTokenAuthenticationFilter* e riguarda il nome dei sensori del device della richiesta, una volta estratto il nome del sensore viene verificato che chi effettua la richiesta abbia l'autorizzazione, il sensore sia suo o gli è stato delegato, in caso negativo questa non può andare a buon fine. Dunque ho implementato il metodo *getSensorNameAPIv2(...)* in modo da restituire il nome del sensore in base alla richiesta effettuata (GET, POST, etc.) e dunque permettere il controllo dell'autorizzazione.
+Per esempio viene effettuata l'estrazione di **temperature** dal payload di una Subscription:
+    ```json
+    {
+    "description": "A subscription to get info about Room1",
+    "subject": {
+        "entities": [
+            {
+                "id": "Room1",
+                "type": "Room"
+            }
+        ],
+        "condition": {
+            "attrs": [
+                "pressure"
+            ]
+        }
+    },
+    "notification": {
+        "http": {
+            "url": "http://localhost:1028/accumulate"
+        },
+        "attrs": [
+            "temperature"
+        ]
+    },
+    "expires": "2040-01-01T14:00:00.00Z",
+    "throttling": 5
+    }
+    ```
 
-Sono stati condotti altri test per verificare il funzionamento del tutto ed infine è stata creata una pull request per quanto riguarda il codice dei blocchetti ed è stato passato il link della repo dell'OrionFilter a Angelo che ha proceduto a vefiricare il funzionamento. 
+Sfruttando la sintassi del payload, la stessa logica è stata usata con le altre API utilizzando uno *switch case* sul metodo della richiesta. Fatto ciò è stato testato il funzionamento sia da me che da Angelo per assicurarci che l'autorizzazione anche di un singolo sensore venisse rispettata. 
+
+Link GitHub del mio progetto: [OrionBrokerFilter](https://github.com/palace22/OrionBrokerFilter)
+
+Sono stati condotti altri test per verificare il funzionamento del tutto ed infine è stata creata una pull request per quanto riguarda il codice dei blocchetti ed è stato passato il link della repo dell'OrionFilter a Angelo che ha proceduto a vefiricare il funzionamento complessivo. 
 
 ---
 ## Bug conosciuti
 
-1. La VM MAIN e la IOTOBSF non sono collegate. I dispositivi installati in una possono non essere visibili dall'altra.
-2. Le sottoscrizioni non vengono salvate, al momento della chiusura di NodeRed le sottoscrizioni restano, l'unsubribe non puo essere fatto non conoscendo l'ID, la subscription viene eliminata all'expire. **RISOLTO**
-3.  Nella VM IOTOBSF, il container di orion ogni tanto (non sono stato in grado di riprodurlo) va in restarting.
+
+1. Le sottoscrizioni non vengono salvate, al momento della chiusura di NodeRed le sottoscrizioni restano, l'unsubribe non puo essere fatto non conoscendo l'ID, la subscription viene eliminata all'expire. **RISOLTO**
+2.  Nella VM IOTOBSF, il container di orion ogni tanto (non sono stato in grado di riprodurlo) va in restarting.
 **POSSIBILE SOLUZIONE**: entrare nella cartella in cui è presente docker-compose:
     ```
     sudo docker-compose down
@@ -312,10 +354,9 @@ Sono stati condotti altri test per verificare il funzionamento del tutto ed infi
     sudo docker-compose down -v --rmi all --remove-orphans
     sudo docker-compose up -d
     ```
-4. La VM MAIN ogni tanto (non sono stato in grado di riprodurlo) da errori di kernel, unica soluzione reinstallare la VM ( BUG punto 1, i dispositivi precedentemente installati e presenti in IOTOBSF non sono piu visibili).
+
 
 ## Possibili sviluppi
 1. **node-red-contrib-snap4city-user**: Continuazione refactoring codice di *OrionAPIv2* soprattutto riguardo le richieste http. Inoltre sarebbe opportuno dividere il file creandone uno per ogni nodo e strutturare meglio il file *snap4city-utility*.
 2. **OrionBrokerFilter**: Al momento, per ogni richiesta (es. Update) viene controllato solamente un sensore (il primo), le richieste dunque vengono eseguite pur non controllando l'ownership o la delegation degli altri o il alternativa consentire l'inserimento di un solo attributo.
-3. Recupero dati da IOTOBSF e inserirli nella VM MAIN e viceversa check di device nella VM MAIN in IOTOBSF.
-4. Creazione su Github di un progetto **Snap4City** in cui inserire una repo per ogni cartella di [snap4city](https://github.com/disit/snap4city).
+
