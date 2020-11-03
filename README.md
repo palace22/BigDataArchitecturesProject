@@ -11,12 +11,12 @@ Questo elaborato ha lo scopo di integrare all'interno del progetto Snap4City le 
 - [2. NodeRed e FiwareOrion](#2-nodered-e-fiwareorion)
   * [2.1 Primi passi](#21-primi-passi)
   * [2.2 Esempio IOT App con blocchetti FiwareOrion API v1](#22-esempio-iot-app-con-blocchetti-fiwareorion-api-v1)
-  * [2.3 Ambiente IoT Edge: sviluppo NodeRed in locale](#23-ambiente-iot-edge--sviluppo-nodered-in-locale)
+  * [2.3 Ambiente IoT Edge: sviluppo NodeRed in locale](#23-ambiente-iot-edge-sviluppo-nodered-in-locale)
   * [2.4 Implementazione Fiware Orion API v2](#24-implementazione-fiware-orion-api-v2)
-    + [**Subscribe**](#--subscribe--)
-    + [**Query**](#--query--)
-    + [**Update**](#--update--)
-  * [2.5 Refactoring, pulizia codice e *SubscriptionStore*](#25-refactoring--pulizia-codice-e--subscriptionstore-)
+    + [**Subscribe**](#subscribe)
+    + [**Query**](#query)
+    + [**Update**](#update)
+  * [2.5 Refactoring, pulizia codice e SubscriptionStore](#25-refactoring-pulizia-codice-e-subscriptionstore)
 - [3. OrionBrokerFilter](#3-orionbrokerfilter)
   * [3.1 Preparazione ambiente](#31-preparazione-ambiente)
   * [3.2 Test funzionamento su API v1](#32-test-funzionamento-su-api-v1)
@@ -195,21 +195,21 @@ Da notare che le richieste verso l'Orion broker vengono prima filtrate per assic
  Questo si traduce nell'impostare nel nodo Service il path del broker della VM iotobsf: [iotobsf:1026](iotobsf:1026). e utilizzare a livello di codice il protocollo http piuttosto che https. 
 
 Ho iniziato facendo alcune prove seguendo la documentazione delle API e utilizzando **[Postman](https://www.postman.com/)**.
-#### **Subscribe**
+#### Subscribe
 Il primo nodo implementato è stato quello del **Subscribe**, procedendo cambiando il path e il payload della richiesta, adattando poi la risposta di Orion a NodeRed: a differenza delle API v1 nelle v2 l'ID della subscription viene restituito nell'*header* della risposta al parametro *Location* e non nel body.
 
-#### **Query**
+#### Query
 Il nodo **Query** da una richiesta POST diventa una di tipo GET, come ci si potrebbe aspettare, dunque sono state modificate le *options* della richiesta costruendo la query con parametri da aggiungere alla URL piuttosto che creare il body:
 ```
 GET iotobsf:1026/v2/entities/{deviceName}?attrs={deviceAttribute}
 ```
 
-#### **Update**
+#### Update
 Riguardo l'Update degli attributi il metodo cambia da POST a PATCH cambiando anche il body. Un cambiamento importante è dato dalla risposta di questo metodo, mentre con le API v1 veniva restituito il body con il device aggiornato con le API v2 la risposta non ha body ma solo uno status code *204 No Content*. La mancanza del body rende il nodo che prende un input e restituisce un output inutile al suo scopo, è stato comunque implementato con il nome: *Fiware-Orion API v2: Test* mentre resta invariato l'utilizzo di *Fiware-Orion API v2: Update*. Nell caso di utilizzo di *Fiware-Orion API v2: Update* il payload cambia rispetto alle API v1 dunque volendo scrivere il payload manualmente all'interno di un blocchetto NodeRed ecco la sinstassi da utilizzare:
 
 ![Alt text](Image/uploadPayload.png)
 
-### 2.5 Refactoring, pulizia codice e *SubscriptionStore*
+### 2.5 Refactoring, pulizia codice e SubscriptionStore
 Durante quest'implementazione ho notato del codice duplicato e parti di codice che poteva essere rifattorizzato. All'interno della cartella *utils* si trovano:
 * *httpRequestOption.js*: classe i cui metodi generano le *options* delle richieste HTTP dei vari nodi (Query, Subscribe, ...).
 * *nodeStatus.js*: classe in cui sono implementati i metodi che consentono di avere un feedback grafico su NodeRed.
