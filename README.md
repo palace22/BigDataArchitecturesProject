@@ -1,13 +1,49 @@
 # Big data architectures: Sviluppo OrionFiware API v2 in nodi NodeRed e integrazione in Snap4City
 
+
 Questo elaborato ha lo scopo di integrare all'interno del progetto Snap4City le API v2 di Fiware Orion Broker, queste verranno implementate all'interno della piattaforma NodeRed utilizzata per lo sviluppo di applicazioni IOT.
+## Contenuti
 
+0. [Introduzione alle tecnologie](#0.-introduzione-alle-tecnologie)
+    -   [Fiware Orion Broker](#fiware-orion-broker)
+    -   [NodeRed](#NodeRed)
+1. [Installazione ambiente di test](#1.-Installazione-ambiente-di-test)
+2. [NodeRed e FiwareOrion](#NodeRed-e-FiwareOrion)
+    
+    2.1 [Primi passi](#Primi-passi)
+    
+    2.2 [Esempio IOT App con blocchetti FiwareOrion API v1](#Esempio-IOT-App-con-blocchetti-FiwareOrion-API-v1)
+    
+    2.3 [Ambiente IoT Edge: sviluppo NodeRed in locale](#Ambiente-IoT-Edge:-sviluppo-NodeRed-in-locale)
+    
+    2.4 [Implementazione Fiware Orion API v2](#Implementazione-Fiware-Orion-API-v2)
+    -   [Subscribe](#Subscribe)
+    -   [Query](#Query)
+    -   [Update](#Update)
+    
+    2.5 [Refactoring, pulizia codice e SubscriptionStore](#Refactoring,-pulizia-codice-e-SubscriptionStore)
+
+3. [OrionBrokerFilter](#OrionBrokerFilter)
+
+    3.1 [Preparazione ambiente](#Preparazione-ambiente)
+    
+    3.2 [Test funzionamento su API v1](#Test-funzionamento-su-API-v1)
+
+    3.3 [Implementazione filter per API v2](#Implementazione-filter-per-API-v2)
+    
+-   [Bug conosciuti](#Bug-conosciuti)
+-   [Possibili sviluppi](#Possibili-sviluppi)
+
+## 0. Introduzione alle tecnologie
 ### Fiware Orion Broker
-
-
+Fiware Orion Broker è un'implementazione dell'IoT Context Broker GE (Generic Enabler) ovvero un compomente middleware, leggero e scalabile, che permette la separazione tra applicazioni IoT e device; questo avviene tramite il classico meccasismo di *Publish* e *Subscribe* dei broker. Il client può utilizzare le API offerte implementate secondo la [specifica NGSI](https://swagger.lab.fiware.org/?url=https://raw.githubusercontent.com/Fiware/specifications/master/OpenAPI/ngsiv2/ngsiv2-openapi.json) che consentono operazioni come come query di un *attribute* di una *entity*: velocità di un'auto, l'update: modificare la temperatura di un termostato, ricevere una nofitica non appena un attributo cambia stato.
 
 ###  NodeRed
 NodeRED è uno strumento di sviluppo basato sul "flusso" che consente di collegare insieme dispositivi hardware, API e servizi online. Elementi principali di NodeRed sono i nodi, graficamente dei blocchetti, che racchiudono all'interno delle funzioni programmate ad hoc per svolgere un determinato compito es. restituire un numero random, eseguire richieste HTTP, etc. Tramite il collegamenti di più nodi è possibile creare vere e proprie applicazioni.
+
+---
+
+Ulteriori informazioni riguardo queste tecnologie verranno fornite nei capitoli di questo elaborato, fornendo quando necessario i link della documentazione.
 
 ## 1. Installazione ambiente di test
 
@@ -342,14 +378,15 @@ Sono stati condotti altri test per verificare il funzionamento del tutto ed infi
 ## Bug conosciuti
 
 
-1. Le sottoscrizioni non vengono salvate, al momento della chiusura di NodeRed le sottoscrizioni restano, l'unsubribe non puo essere fatto non conoscendo l'ID, la subscription viene eliminata all'expire. **RISOLTO**
+1. Le sottoscrizioni non vengono salvate, al momento della chiusura di NodeRed le sottoscrizioni restano, l'unsubribe non puo essere fatto non conoscendo l'ID, la subscription viene eliminata all'expire. **(RISOLTO: 2.5 SubscriptionStore)**
 2.  Nella VM IOTOBSF, il container di orion ogni tanto (non sono stato in grado di riprodurlo) va in restarting.
-**POSSIBILE SOLUZIONE**: entrare nella cartella in cui è presente docker-compose:
+
+    **POSSIBILE SOLUZIONE**: entrare nella cartella in cui è presente docker-compose:
     ```
     sudo docker-compose down
     sudo docker-compose up -d
     ```
-    **Soluzione drastica** rimuove tutto e reinstalla i     container, verranno eliminati i device e i dati inseriti    (BUG 1.):
+    **SOLUZIONE DRASTICA** rimuove tutto e reinstalla i     container, verranno eliminati i device e i dati inseriti:
     ```
     sudo docker-compose down -v --rmi all --remove-orphans
     sudo docker-compose up -d
@@ -358,5 +395,5 @@ Sono stati condotti altri test per verificare il funzionamento del tutto ed infi
 
 ## Possibili sviluppi
 1. **node-red-contrib-snap4city-user**: Continuazione refactoring codice di *OrionAPIv2* soprattutto riguardo le richieste http. Inoltre sarebbe opportuno dividere il file creandone uno per ogni nodo e strutturare meglio il file *snap4city-utility*.
-2. **OrionBrokerFilter**: Al momento, per ogni richiesta (es. Update) viene controllato solamente un sensore (il primo), le richieste dunque vengono eseguite pur non controllando l'ownership o la delegation degli altri o il alternativa consentire l'inserimento di un solo attributo.
+2. **OrionBrokerFilter**: Al momento, per ogni richiesta (es. Update) viene controllato solamente un sensore (il primo), le richieste dunque vengono eseguite pur non controllando l'ownership o la delegation degli altri, risolvere questo controllando tutti gli attributi o in alternativa consentire l'inserimento di un solo attributo.
 
