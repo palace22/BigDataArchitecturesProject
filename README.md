@@ -2,37 +2,28 @@
 
 
 Questo elaborato ha lo scopo di integrare all'interno del progetto Snap4City le API v2 di Fiware Orion Broker, queste verranno implementate all'interno della piattaforma NodeRed utilizzata per lo sviluppo di applicazioni IOT.
+
 ## Contenuti
+- [0. Introduzione alle tecnologie](#0-introduzione-alle-tecnologie)
+  * [Fiware Orion Broker](#fiware-orion-broker)
+  * [NodeRed](#nodered)
+- [1. Installazione ambiente di test](#1-installazione-ambiente-di-test)
+- [2. NodeRed e FiwareOrion](#2-nodered-e-fiwareorion)
+  * [2.1 Primi passi](#21-primi-passi)
+  * [2.2 Esempio IOT App con blocchetti FiwareOrion API v1](#22-esempio-iot-app-con-blocchetti-fiwareorion-api-v1)
+  * [2.3 Ambiente IoT Edge: sviluppo NodeRed in locale](#23-ambiente-iot-edge--sviluppo-nodered-in-locale)
+  * [2.4 Implementazione Fiware Orion API v2](#24-implementazione-fiware-orion-api-v2)
+    + [**Subscribe**](#--subscribe--)
+    + [**Query**](#--query--)
+    + [**Update**](#--update--)
+  * [2.5 Refactoring, pulizia codice e *SubscriptionStore*](#25-refactoring--pulizia-codice-e--subscriptionstore-)
+- [3. OrionBrokerFilter](#3-orionbrokerfilter)
+  * [3.1 Preparazione ambiente](#31-preparazione-ambiente)
+  * [3.2 Test funzionamento su API v1](#32-test-funzionamento-su-api-v1)
+  * [3.3 Implementazione filter per API v2](#33-implementazione-filter-per-api-v2)
+- [Bug conosciuti](#bug-conosciuti)
+- [Possibili sviluppi](#possibili-sviluppi)
 
-0. [Introduzione alle tecnologie](#0.-introduzione-alle-tecnologie)
-    - [Fiware Orion Broker](#fiware-orion-broker)
-    -   [NodeRed](#NodeRed)
-1. [Installazione ambiente di test](#1.-Installazione-ambiente-di-test)
-2. [NodeRed e FiwareOrion](#2.-NodeRed-e-FiwareOrion)
-    
-    2.1 [Primi passi](#2.1-Primi-passi)
-    
-    2.2 [Esempio IOT App con blocchetti FiwareOrion API v1](#2.2-Esempio-IOT-App-con-blocchetti-FiwareOrion-API-v1)
-    
-    2.3 [Ambiente IoT Edge: sviluppo NodeRed in locale](#2.3-Ambiente-IoT-Edge:-sviluppo-NodeRed-in-locale)
-    
-    2.4 [Implementazione Fiware Orion API v2](#2/4-Implementazione-Fiware-Orion-API-v2)
-    -   [Subscribe](#Subscribe)
-    -   [Query](#Query)
-    -   [Update](#Update)
-    
-    2.5 [Refactoring, pulizia codice e SubscriptionStore](#2.5-Refactoring,-pulizia-codice-e-SubscriptionStore)
-
-3. [OrionBrokerFilter](#3.-OrionBrokerFilter)
-
-    3.1 [Preparazione ambiente](#3.1-Preparazione-ambiente)
-    
-    3.2 [Test funzionamento su API v1](#3.2-Test-funzionamento-su-API-v1)
-
-    3.3 [Implementazione filter per API v2](#3.3-Implementazione-filter-per-API-v2)
-    
--   [Bug conosciuti](#Bug-conosciuti)
--   [Possibili sviluppi](#Possibili-sviluppi)
 
 ## 0. Introduzione alle tecnologie
 ### Fiware Orion Broker
