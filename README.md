@@ -5,31 +5,31 @@ Questo elaborato ha lo scopo di integrare all'interno del progetto Snap4City le 
 ## Contenuti
 
 0. [Introduzione alle tecnologie](#0.-introduzione-alle-tecnologie)
-    -   [Fiware Orion Broker](#fiware-orion-broker)
+    - [Fiware Orion Broker](#fiware-orion-broker)
     -   [NodeRed](#NodeRed)
 1. [Installazione ambiente di test](#1.-Installazione-ambiente-di-test)
-2. [NodeRed e FiwareOrion](#NodeRed-e-FiwareOrion)
+2. [NodeRed e FiwareOrion](#2.-NodeRed-e-FiwareOrion)
     
-    2.1 [Primi passi](#Primi-passi)
+    2.1 [Primi passi](#2.1-Primi-passi)
     
-    2.2 [Esempio IOT App con blocchetti FiwareOrion API v1](#Esempio-IOT-App-con-blocchetti-FiwareOrion-API-v1)
+    2.2 [Esempio IOT App con blocchetti FiwareOrion API v1](#2.2-Esempio-IOT-App-con-blocchetti-FiwareOrion-API-v1)
     
-    2.3 [Ambiente IoT Edge: sviluppo NodeRed in locale](#Ambiente-IoT-Edge:-sviluppo-NodeRed-in-locale)
+    2.3 [Ambiente IoT Edge: sviluppo NodeRed in locale](#2.3-Ambiente-IoT-Edge:-sviluppo-NodeRed-in-locale)
     
-    2.4 [Implementazione Fiware Orion API v2](#Implementazione-Fiware-Orion-API-v2)
+    2.4 [Implementazione Fiware Orion API v2](#2/4-Implementazione-Fiware-Orion-API-v2)
     -   [Subscribe](#Subscribe)
     -   [Query](#Query)
     -   [Update](#Update)
     
-    2.5 [Refactoring, pulizia codice e SubscriptionStore](#Refactoring,-pulizia-codice-e-SubscriptionStore)
+    2.5 [Refactoring, pulizia codice e SubscriptionStore](#2.5-Refactoring,-pulizia-codice-e-SubscriptionStore)
 
-3. [OrionBrokerFilter](#OrionBrokerFilter)
+3. [OrionBrokerFilter](#3.-OrionBrokerFilter)
 
-    3.1 [Preparazione ambiente](#Preparazione-ambiente)
+    3.1 [Preparazione ambiente](#3.1-Preparazione-ambiente)
     
-    3.2 [Test funzionamento su API v1](#Test-funzionamento-su-API-v1)
+    3.2 [Test funzionamento su API v1](#3.2-Test-funzionamento-su-API-v1)
 
-    3.3 [Implementazione filter per API v2](#Implementazione-filter-per-API-v2)
+    3.3 [Implementazione filter per API v2](#3.3-Implementazione-filter-per-API-v2)
     
 -   [Bug conosciuti](#Bug-conosciuti)
 -   [Possibili sviluppi](#Possibili-sviluppi)
