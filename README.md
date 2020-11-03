@@ -2,7 +2,7 @@
 
 
 Questo elaborato ha lo scopo di integrare all'interno del progetto Snap4City le API v2 di Fiware Orion Broker, queste verranno implementate all'interno della piattaforma NodeRed utilizzata per lo sviluppo di applicazioni IOT.
-
+ Dopo una breve introduzione a Orion e NodeRed verrà spiegato come ho impostato l'ambiente necessario allo sviluppo, procendo passo passo e partendo dalle installazioni, procedendo con i test di funzionamento fino all'implementazione delle nuove funzionalità, discutendo dei problemi riscontrati e di quelli risolti. Infine ho voluto riportare due bug conosciuti e due possibili sviluppi per Snap4City.
 ## Contenuti
 - [0. Introduzione alle tecnologie](#0-introduzione-alle-tecnologie)
   * [Fiware Orion Broker](#fiware-orion-broker)
@@ -13,9 +13,9 @@ Questo elaborato ha lo scopo di integrare all'interno del progetto Snap4City le 
   * [2.2 Esempio IOT App con blocchetti FiwareOrion API v1](#22-esempio-iot-app-con-blocchetti-fiwareorion-api-v1)
   * [2.3 Ambiente IoT Edge: sviluppo NodeRed in locale](#23-ambiente-iot-edge-sviluppo-nodered-in-locale)
   * [2.4 Implementazione Fiware Orion API v2](#24-implementazione-fiware-orion-api-v2)
-    + [**Subscribe**](#subscribe)
-    + [**Query**](#query)
-    + [**Update**](#update)
+    + [Subscribe](#subscribe)
+    + [Query](#query)
+    + [Update](#update)
   * [2.5 Refactoring, pulizia codice e SubscriptionStore](#25-refactoring-pulizia-codice-e-subscriptionstore)
 - [3. OrionBrokerFilter](#3-orionbrokerfilter)
   * [3.1 Preparazione ambiente](#31-preparazione-ambiente)
@@ -118,10 +118,11 @@ Per cominciare ad avere familiarità con Orion e NodeRed facciamo un esempio.
      ```
      docker container ls
      ```
-     è possibile vedere che va in _Restarting_, ad ora l unica soluzione è di eliminare il container e ricrearlo, anche in questo caso bisogno ricreare dalla Dashboard sia modello che device in quanto il precedente non sarà presente nel broker.
+     è possibile vedere che va in _Restarting_: **2. di [Bug conosciuti](#bug-conosciuti)**.
+
 
 2. Apriamo **IOT Application** ovvero NodeRed.
-3. Importiamo il _flow_ di esempio delle API v1 in cui vanno cambiati i parametri del device: Id, Type, K1, K2.
+3. Importiamo il _flow_ di esempio delle API v1 in cui vanno cambiati i parametri del device: Id, Type, K1 e K2, verificare inoltre da interfaccia NodeRed il *Service* utilizzato.
    ![Alt text](Screen/FiwareOrionV1Example.png)
 
 4. Testiamo il funzionamento.
