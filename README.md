@@ -387,5 +387,4 @@ Sono stati condotti altri test per verificare il funzionamento del tutto ed infi
 
 ## Possibili sviluppi
 1. **node-red-contrib-snap4city-user**: Continuazione refactoring codice di *OrionAPIv2* soprattutto riguardo le richieste http. Inoltre sarebbe opportuno dividere il file creandone uno per ogni nodo e strutturare meglio il file *snap4city-utility*.
-2. **OrionBrokerFilter**: Al momento, per ogni richiesta (es. Update) viene controllato solamente un sensore (il primo), le richieste dunque vengono eseguite pur non controllando l'ownership o la delegation degli altri, risolvere questo controllando tutti gli attributi o in alternativa consentire l'inserimento di un solo attributo.
 
